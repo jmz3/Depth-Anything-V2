@@ -1,0 +1,21 @@
+xFormers not available
+xFormers not available
+[2026-02-11 16:14:39,534][    INFO] {'bs': 1,
+ 'dataset': 'xray',
+ 'encoder': 'vitl',
+ 'epochs': 120,
+ 'img_size': 518,
+ 'lr': 5e-06,
+ 'max_depth': 1000.0,
+ 'min_depth': 0.001,
+ 'pretrained_from': '../checkpoints/depth_anything_v2_vitl.pth',
+ 'save_path': 'exp/xray'}
+
+Traceback (most recent call last):
+  File "/home/jeremy/research/Depth-Anything-V2/metric_depth/train.py", line 348, in <module>
+    main()
+  File "/home/jeremy/research/Depth-Anything-V2/metric_depth/train.py", line 77, in main
+    trainset = XrayDepth(
+  File "/home/jeremy/research/Depth-Anything-V2/metric_depth/dataset/xray.py", line 49, in __init__
+    with open(filelist_path, "r") as f:
+IsADirectoryError: [Errno 21] Is a directory: '/home/jeremy/data/XrayDepthEstScaling'

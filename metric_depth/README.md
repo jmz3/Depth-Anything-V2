@@ -25,6 +25,10 @@ We provide **six metric depth models** of three scales for indoor and outdoor sc
 git clone https://github.com/DepthAnything/Depth-Anything-V2
 cd Depth-Anything-V2/metric_depth
 pip install -r requirements.txt
+
+## install xformers based on your CUDA version, e.g. for CUDA 12.8:
+# Don't do simple pip install xformers as it may accidentally upgrade your PyTorch to an incompatible version. 
+pip install -U xformers --index-url https://download.pytorch.org/whl/cu128
 ```
 
 Download the checkpoints listed [here](#pre-trained-models) and put them under the `checkpoints` directory.
@@ -93,22 +97,3 @@ bash dist_train.sh
 ```
 
 
-## Citation
-
-If you find this project useful, please consider citing:
-
-```bibtex
-@article{depth_anything_v2,
-  title={Depth Anything V2},
-  author={Yang, Lihe and Kang, Bingyi and Huang, Zilong and Zhao, Zhen and Xu, Xiaogang and Feng, Jiashi and Zhao, Hengshuang},
-  journal={arXiv:2406.09414},
-  year={2024}
-}
-
-@inproceedings{depth_anything_v1,
-  title={Depth Anything: Unleashing the Power of Large-Scale Unlabeled Data}, 
-  author={Yang, Lihe and Kang, Bingyi and Huang, Zilong and Xu, Xiaogang and Feng, Jiashi and Zhao, Hengshuang},
-  booktitle={CVPR},
-  year={2024}
-}
-```

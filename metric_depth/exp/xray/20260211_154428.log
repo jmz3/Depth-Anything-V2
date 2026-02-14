@@ -1,0 +1,19 @@
+xFormers not available
+xFormers not available
+[2026-02-11 15:44:29,992][    INFO] {'bs': 1,
+ 'dataset': 'xray',
+ 'encoder': 'vitl',
+ 'epochs': 120,
+ 'img_size': 518,
+ 'lr': 5e-06,
+ 'max_depth': 1000.0,
+ 'min_depth': 0.001,
+ 'pretrained_from': '../checkpoints/depth_anything_v2_vitl.pth',
+ 'save_path': 'exp/xray'}
+
+Traceback (most recent call last):
+  File "/home/jeremy/research/Depth-Anything-V2/metric_depth/train.py", line 346, in <module>
+    main()
+  File "/home/jeremy/research/Depth-Anything-V2/metric_depth/train.py", line 77, in main
+    trainset = XrayDepth(
+TypeError: XrayDepth.__init__() missing 1 required positional argument: 'mode'

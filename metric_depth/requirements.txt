@@ -3,3 +3,5 @@ opencv-python
 open3d
 torch
 torchvision
+tensorboard
+h5py

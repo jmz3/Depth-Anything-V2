@@ -1,0 +1,12 @@
+xFormers not available
+xFormers not available
+Traceback (most recent call last):
+  File "/home/jeremy/research/Depth-Anything-V2/metric_depth/train.py", line 373, in <module>
+    main()
+  File "/home/jeremy/research/Depth-Anything-V2/metric_depth/train.py", line 64, in main
+    rank, world_size = setup_distributed(port=args.port)
+  File "/home/jeremy/research/Depth-Anything-V2/metric_depth/util/dist_helper.py", line 31, in setup_distributed
+    rank = int(os.environ["RANK"])
+  File "/home/jeremy/anaconda3/envs/da2/lib/python3.10/os.py", line 680, in __getitem__
+    raise KeyError(key) from None
+KeyError: 'RANK'
