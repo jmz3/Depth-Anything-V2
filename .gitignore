@@ -39,3 +39,8 @@ ENV/
 checkpoints/
 models/
 weights/
+
+# Logs
+logs/
+*.log
+exp/**
