@@ -37,16 +37,18 @@ class ConvBlock(nn.Module):
 
 class DPTHead(nn.Module):
     def __init__(
-        self, 
-        in_channels, 
-        features=256, 
-        use_bn=False, 
-        out_channels=[256, 512, 1024, 1024], 
-        use_clstoken=False
+        self,
+        in_channels,
+        features=256,
+        use_bn=False,
+        out_channels=[256, 512, 1024, 1024],
+        use_clstoken=False,
+        predict_mask=False
     ):
         super(DPTHead, self).__init__()
         
         self.use_clstoken = use_clstoken
+        self.predict_mask = predict_mask
         
         self.projects = nn.ModuleList([
             nn.Conv2d(
@@ -112,6 +114,14 @@ class DPTHead(nn.Module):
             nn.Conv2d(head_features_2, 1, kernel_size=1, stride=1, padding=0),
             nn.Sigmoid()
         )
+
+        if predict_mask:
+            self.scratch.output_conv_mask = nn.Sequential(
+                nn.Conv2d(head_features_1 // 2, head_features_2, kernel_size=3, stride=1, padding=1),
+                nn.ReLU(True),
+                nn.Conv2d(head_features_2, 1, kernel_size=1, stride=1, padding=0),
+                nn.Sigmoid()
+            )
     
     def forward(self, out_features, patch_h, patch_w):
         out = []
@@ -144,54 +154,74 @@ class DPTHead(nn.Module):
         
         out = self.scratch.output_conv1(path_1)
         out = F.interpolate(out, (int(patch_h * 14), int(patch_w * 14)), mode="bilinear", align_corners=True)
+
+        if self.predict_mask:
+            mask_out = self.scratch.output_conv_mask(out)
+            depth_out = self.scratch.output_conv2(out)
+            return depth_out, mask_out
+
         out = self.scratch.output_conv2(out)
-        
+
         return out
 
 
 class DepthAnythingV2(nn.Module):
     def __init__(
-        self, 
-        encoder='vitl', 
-        features=256, 
-        out_channels=[256, 512, 1024, 1024], 
-        use_bn=False, 
+        self,
+        encoder='vitl',
+        features=256,
+        out_channels=[256, 512, 1024, 1024],
+        use_bn=False,
         use_clstoken=False,
-        max_depth=20.0
+        max_depth=20.0,
+        predict_mask=False
     ):
         super(DepthAnythingV2, self).__init__()
-        
+
         self.intermediate_layer_idx = {
             'vits': [2, 5, 8, 11],
-            'vitb': [2, 5, 8, 11], 
-            'vitl': [4, 11, 17, 23], 
+            'vitb': [2, 5, 8, 11],
+            'vitl': [4, 11, 17, 23],
             'vitg': [9, 19, 29, 39]
         }
-        
+
         self.max_depth = max_depth
-        
+        self.predict_mask = predict_mask
+
         self.encoder = encoder
         self.pretrained = DINOv2(model_name=encoder)
-        
-        self.depth_head = DPTHead(self.pretrained.embed_dim, features, use_bn, out_channels=out_channels, use_clstoken=use_clstoken)
+
+        self.depth_head = DPTHead(self.pretrained.embed_dim, features, use_bn, out_channels=out_channels, use_clstoken=use_clstoken, predict_mask=predict_mask)
     
     def forward(self, x):
         patch_h, patch_w = x.shape[-2] // 14, x.shape[-1] // 14
-        
+
         features = self.pretrained.get_intermediate_layers(x, self.intermediate_layer_idx[self.encoder], return_class_token=True)
-        
+
+        if self.predict_mask:
+            depth, mask = self.depth_head(features, patch_h, patch_w)
+            depth = depth * self.max_depth
+            return depth.squeeze(1), mask.squeeze(1)
+
         depth = self.depth_head(features, patch_h, patch_w) * self.max_depth
-        
+
         return depth.squeeze(1)
     
     @torch.no_grad()
     def infer_image(self, raw_image, input_size=518):
         image, (h, w) = self.image2tensor(raw_image, input_size)
-        
-        depth = self.forward(image)
-        
+
+        out = self.forward(image)
+
+        if self.predict_mask:
+            depth, mask = out
+            depth = F.interpolate(depth[:, None], (h, w), mode="bilinear", align_corners=True)[0, 0]
+            mask = F.interpolate(mask[:, None], (h, w), mode="bilinear", align_corners=True)[0, 0]
+            return depth.cpu().numpy(), mask.cpu().numpy()
+
+        depth = out
         depth = F.interpolate(depth[:, None], (h, w), mode="bilinear", align_corners=True)[0, 0]
-        
+
         return depth.cpu().numpy()
     
     def image2tensor(self, raw_image, input_size=518):        

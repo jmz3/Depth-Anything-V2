@@ -8,6 +8,7 @@ import warnings
 import numpy as np
 import torch
 import torch.backends.cudnn as cudnn
+import torch.nn as nn
 from torch.utils.data import DataLoader
 from torch.optim import AdamW
 import torch.nn.functional as F
@@ -133,8 +134,9 @@ def main():
             "out_channels": [1536, 1536, 1536, 1536],
         },
     }
+    predict_mask = args.dataset == "xray"
     model = DepthAnythingV2(
-        **{**model_configs[args.encoder], "max_depth": args.max_depth}
+        **{**model_configs[args.encoder], "max_depth": args.max_depth, "predict_mask": predict_mask}
     )
 
     if args.pretrained_from:
@@ -150,6 +152,8 @@ def main():
     model = model.to(device)
 
     criterion = SiLogLoss().to(device)
+    if predict_mask:
+        mask_criterion = nn.BCELoss().to(device)
 
     optimizer = AdamW(
         [
@@ -230,7 +234,10 @@ def main():
                 depth = depth.flip(-1)
                 valid_mask = valid_mask.flip(-1)
 
-            pred = model(img)
+            if predict_mask:
+                pred, pred_mask = model(img)
+            else:
+                pred = model(img)
 
             loss = criterion(
                 pred,
@@ -239,6 +246,9 @@ def main():
                 & (depth >= args.min_depth)
                 & (depth <= args.max_depth),
             )
+
+            if predict_mask:
+                loss = loss + 0.1 * mask_criterion(pred_mask, valid_mask.float())
 
             loss.backward()
             optimizer.step()
@@ -288,7 +298,10 @@ def main():
             )
 
             with torch.no_grad():
-                pred = model(img)
+                if predict_mask:
+                    pred, _ = model(img)
+                else:
+                    pred = model(img)
                 pred = F.interpolate(
                     pred[:, None], depth.shape[-2:], mode="bilinear", align_corners=True
                 )[0, 0]
