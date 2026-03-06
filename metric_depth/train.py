@@ -48,7 +48,12 @@ parser.add_argument("--bs", default=2, type=int)
 parser.add_argument("--lr", default=0.000005, type=float)
 parser.add_argument("--pretrained-from", type=str)
 parser.add_argument("--save-path", type=str, required=True)
-parser.add_argument("--data-path", type=str, default=None, help="Root directory for dataset (required for xray)")
+parser.add_argument(
+    "--data-path",
+    type=str,
+    default=None,
+    help="Root directory for dataset (required for xray)",
+)
 
 
 def main():
@@ -135,9 +140,14 @@ def main():
             "out_channels": [1536, 1536, 1536, 1536],
         },
     }
-    predict_mask = args.dataset == "xray"
+    # predict_mask = args.dataset == "xray"
+    predict_mask = False  # change to True to enable mask prediction
     model = DepthAnythingV2(
-        **{**model_configs[args.encoder], "max_depth": args.max_depth, "predict_mask": predict_mask}
+        **{
+            **model_configs[args.encoder],
+            "max_depth": args.max_depth,
+            "predict_mask": predict_mask,
+        }
     )
 
     if args.pretrained_from:
