@@ -249,7 +249,8 @@ def main():
             )
 
             if predict_mask:
-                loss = loss + 0.1 * mask_criterion(pred_mask, valid_mask.float())
+                mask_loss = 0.1 * mask_criterion(pred_mask, valid_mask.float())
+                loss = loss + mask_loss
 
             loss.backward()
             optimizer.step()
@@ -267,11 +268,12 @@ def main():
 
             if i % 100 == 0:
                 logger.info(
-                    "Iter: {}/{}, LR: {:.7f}, Loss: {:.3f}".format(
+                    "Iter: {}/{}, LR: {:.7f}, Depth Loss: {:.3f}, Mask Loss: {:.3f}".format(
                         i,
                         len(trainloader),
                         optimizer.param_groups[0]["lr"],
                         loss.item(),
+                        mask_loss.item() if predict_mask else 0,
                     )
                 )
 

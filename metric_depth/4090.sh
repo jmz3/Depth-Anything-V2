@@ -4,11 +4,12 @@ set -euo pipefail
 now=$(date +"%Y%m%d_%H%M%S")
 
 epoch=30
-bs=1
+bs=4
 lr=0.000005
 encoder=vitl
 dataset=xray
-data_path=/home/jeremy/data/XrayDepthEstScaling
+# data_path=/home/jeremy/data/XrayDepthEstScaling
+data_path=/home/bigss/XrayDepthSimulator
 img_size=518
 min_depth=0.0
 max_depth=1000.0
@@ -18,7 +19,7 @@ save_path=exp/xray-0306
 mkdir -p "$save_path"
 
 # Optional: force using only one GPU (GPU 0). Change to 1,2,... if desired.
-export CUDA_VISIBLE_DEVICES=0
+export CUDA_VISIBLE_DEVICES=1
 
 python3 train.py \
   --epochs "$epoch" \

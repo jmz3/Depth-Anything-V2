@@ -43,4 +43,4 @@ weights/
 # Logs
 logs/
 *.log
-exp/**
+**/exp/**
