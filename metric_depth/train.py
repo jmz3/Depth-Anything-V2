@@ -48,6 +48,7 @@ parser.add_argument("--bs", default=2, type=int)
 parser.add_argument("--lr", default=0.000005, type=float)
 parser.add_argument("--pretrained-from", type=str)
 parser.add_argument("--save-path", type=str, required=True)
+parser.add_argument("--data-path", type=str, default=None, help="Root directory for dataset (required for xray)")
 
 
 def main():
@@ -76,7 +77,7 @@ def main():
         trainset = VKITTI2("dataset/splits/vkitti2/train.txt", "train", size=size)
     elif args.dataset == "xray":
         trainset = XrayDepth(
-            "/home/jeremy/data/XrayDepthEstScaling",
+            args.data_path,
             "dataset/splits/xray/train.txt",
             "train",
             size=size,
@@ -99,7 +100,7 @@ def main():
         valset = KITTI("dataset/splits/kitti/val.txt", "val", size=size)
     elif args.dataset == "xray":
         valset = XrayDepth(
-            "/home/jeremy/data/XrayDepthEstScaling",
+            args.data_path,
             "dataset/splits/xray/val.txt",
             "val",
             size=size,

@@ -8,6 +8,7 @@ bs=1
 lr=0.000005
 encoder=vitl
 dataset=xray
+data_path=/home/jeremy/data/XrayDepthEstScaling
 img_size=518
 min_depth=0.0
 max_depth=1000.0
@@ -26,6 +27,7 @@ python3 train.py \
   --lr "$lr" \
   --save-path "$save_path" \
   --dataset "$dataset" \
+  --data-path "$data_path" \
   --img-size "$img_size" \
   --min-depth "$min_depth" \
   --max-depth "$max_depth" \
