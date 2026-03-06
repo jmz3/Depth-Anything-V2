@@ -92,6 +92,7 @@ class XrayDepth(Dataset):
         depth = cv2.imread(depth_path, cv2.IMREAD_ANYCOLOR | cv2.IMREAD_ANYDEPTH)
         depth = depth.astype(np.float32) / 10.0
 
+        
         sample = self.transform({"image": image, "depth": depth})
 
         sample["image"] = torch.from_numpy(sample["image"])
